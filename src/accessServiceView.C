@@ -45,6 +45,8 @@ AccessServiceView::AccessServiceView( WContainerWidget*parent ):WContainerWidget
 	basicTypes_["double"]="double";
 	basicTypes_["string"]="string";
 	//list set map
+	
+	root()->setLayout(hbox_);
 }
 
 int AccessServiceView::readServiceData()
@@ -143,13 +145,64 @@ void AccessServiceView::renderCodesSummary(string bundleName )
 	else
 		cell->addWidget(new Wt::WAnchor(WLink(WLink::InternalPath, "/libs/"+it->second.csharpCodes_, it->second.csharpCodes_  )));
 	cell->setColumnSpan(2);
+	
+	contents_->setCurrentIndex(0);
 }
 
 void AccessServiceView::renderServiceDefine(string bundleName )
 {
+	methodDef_->clear();
+	
+	WTableCell *cell = methodDef_->elementAt(0, 0);
+	cell->addWidget(new Wt::WText(bundleName));
+	cell->setColumnSpan(2);
+	methodDef_->elementAt(1, 0)->addWidget(new Wt::WText(" "));
+	methodDef_->elementAt(1, 1)->addWidget(new Wt::WText(" "));
+	
+	methodDef_->elementAt( 2, 0)->addWidget(new WText("方法:"));
+	WLineEdit* nameEdit = new WLineEdit( dsName, methodDef_->elementAt( 2, 1));
+	nameEdit->resize(WLength(100), WLength::Auto);
+	
+	methodDef_->elementAt( 3, 0)->addWidget(new WText("sql:"));
+	WTextArea * sqlEdit = new WLineEdit( dsName, methodDef_->elementAt( 3, 1));
+	sqlEdit->resize(WLength(100), WLength(50));
+	
+	methodDef_->elementAt( 4, 0)->addWidget(new WText("输入参数:"));
+	nameEdit = new WLineEdit( dsName, methodDef_->elementAt( 4, 1));
+	nameEdit->resize(WLength(100), WLength::Auto);
+	
+	methodDef_->elementAt( 5, 0)->addWidget(new WText("输出参数:"));
+	nameEdit = new WLineEdit( dsName, methodDef_->elementAt( 5, 1));
+	nameEdit->resize(WLength(100), WLength::Auto);
+
+	methodDef_->elementAt(6, 0)->addWidget(new Wt::WText(" "));
+	methodDef_->elementAt(6, 1)->addWidget(new Wt::WText(" "));
+	
+	methodDef_->elementAt( 7, 0)->addWidget(new WPushButton("确定"));
+	methodDef_->elementAt( 7, 1)->addWidget(new WPushButton("撤销"));
+	
+	contents_->setCurrentIndex(1);
 }
 
 void AccessServiceView::renderEntityDefine(string entityName )
 {
+	entityDef_->clear();
+	
+	entityDef_->elementAt( 0, 0)->addWidget(new WText("实体:"));
+	WLineEdit* nameEdit = new WLineEdit( dsName, entityDef_->elementAt( 0, 1));
+	nameEdit->resize(WLength(100), WLength::Auto);
+	
+	WTableCell *cell = entityDef_->elementAt(1, 0);
+	WTextArea * sqlEdit = new WLineEdit( dsName, cell);
+	sqlEdit->resize(WLength(180), WLength(80));
+	cell->setColumnSpan(2);
+
+	methodDef_->elementAt(2, 0)->addWidget(new Wt::WText(" "));
+	methodDef_->elementAt(2, 1)->addWidget(new Wt::WText(" "));
+	
+	methodDef_->elementAt( 3, 0)->addWidget(new WPushButton("确定"));
+	methodDef_->elementAt( 3, 1)->addWidget(new WPushButton("撤销"));
+	
+	contents_->setCurrentIndex(2);
 }
 

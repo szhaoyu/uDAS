@@ -84,8 +84,14 @@ system		MD5('admin')	2012-10-14 10:53:00
 class TypeBool
 {
 public:
-	static string toString( bool var );
-	static bool   parseString( string var );
+	string toString( bool var );
+	bool   parseString( string var );
+};
+class TypeDate
+{
+public:
+	string toString();
+	int fromString();
 };
 
 struct ObjectFieldDef

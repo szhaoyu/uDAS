@@ -81,6 +81,13 @@ system		MD5('admin')	2012-10-14 10:53:00
  */
 //author, time, desc, keywords,
 
+class TypeBool
+{
+public:
+	static string toString( bool var );
+	static bool   parseString( string var );
+};
+
 struct ObjectFieldDef
 {
 	string			fname_;

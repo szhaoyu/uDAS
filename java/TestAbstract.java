@@ -1,0 +1,1 @@
+public abstract class TestAbstract {	public abstract void helloAbs( String one );}

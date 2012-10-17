@@ -2,10 +2,10 @@ public class TestTwo {
 	public TestTwo() {
 		super();
 	}
-	public hello( String one ) {
+	public void hello( String one ) {
 		System.out.println( "hello "+one );
 	}
-	public static helloAbs( String one ) {
+	public static void helloAbs( String one ) {
 		System.out.println( "abstract hello "+one );
 	}
 }

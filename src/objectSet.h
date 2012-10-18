@@ -86,37 +86,177 @@ USER ENTRY:
 -Name-		-passwd-		-registeDate-
 system		MD5('admin')	2012-10-14 10:53:00
 ...
-
  */
 //author, time, desc, keywords,
 
-class TypeBool
+enum IndexType { Btree, FullText, None };
+
+class TypeNumber
 {
 public:
-	string toString( bool var );
-	bool   parseString( string var );
+	double	rangeMin_, rangeMax_, defaultVal_;	//取值范围和缺省值
 };
-class TypeDate
+
+class TypeDateTime
 {
 public:
-	string toString();
-	int fromString();
+	string				rangeMin_, rangeMax_, defaultVal_;	//取值范围和缺省值
+};
+
+class TypeString
+{
+public:
+	string				rangeMin_, rangeMax_, defaultVal_;	//取值范围和缺省值
+	int					length_;
+	enum IndexType		index_;								//索引类型
+};
+
+// | TEXT   ['('<len>')']  [ INDEX (PLAIN|FULL-TEXT|NONE) ]
+class TypeText
+{
+public:
+	int					length_;
+	enum IndexType		index_;								//索引类型
+};
+// | BLOB
+// | DOCX   
+// | FILE   [ INDEX (FULL-TEXT|NONE) ]
+class TypeFile
+{
+public:
+	enum IndexType		index_;								//索引类型
+};
+// | LIST '<' BOOL|NUMBER|DATE|STRING['('<len>')']|TEXT['('<len>')']|BLOB|DOCX|FILE [INDEX NONE] '>'
+class TypeList
+{
+public:
+	enum ObjectDataFlag				embedFlag_;				//嵌套类型标识
+	void*							pEmbedType_;			//嵌套类型参数
+};
+// | ENUM '<' NUMBER|DATE|STRING '>' VALUES '(' 120,200,300|'2012-09-21 12:23:32','2012-09-21 12:23:32'|'ONE','TWO' ')'
+class TypeEnumNumber
+{
+public:
+	set<double>			preValues_;
+};
+class TypeEnumDate
+{
+public:
+	set<string>			preValues_;
+};
+class TypeEnumString
+{
+public:
+	set<string>			preValues_;
+};
+// | KEYWORDS ['('12')']
+class TypeKeyWords
+{
+public:
+	int						size_;
+};
+// | ABSTRACT ['('256')']
+class TypeAbstract
+{
+public:
+	int						length_;
+};
+// | CATALOG
+
+enum ObjectDataFlag { Bool, Number, Date, String, Text, Blob, Docx, File, KeyWords, Summary, Catalog, 
+	List, EnumNumber, EnumString, EnumDate, EmbedObject };
+class ObjectDataType 
+{
+public:
+	enum ObjectDataFlag				flag_;
+	bool							notNull_;		//非空要求
+	bool							unique_;		//Number, Date, String
+	union 
+	{
+		TypeNumber*					pNum_;
+		TypeDateTime*				pDate_;
+		TypeString*					pStr_;
+		TypeText*					pText_;
+		TypeFile*					pFile_;
+		TypeList*					pList_;
+		TypeEnumNumber*				pEnumNum_;
+		TypeEnumDate*				pEnumDate_;
+		TypeEnumString*				pEnumStr_;
+		TypeKeyWords*				pKeyWords_;
+		TypeAbstract*				pAbstract_;
+	}type_;
 };
 
 struct ObjectFieldDef
 {
 	string			fname_;
-	enum DataType  	ftype_;
+	ObjectDataType	ftype_;
 };
 
-enum ObjectStatus { InitRead, NewData, DeleteData, UpdateData, WriteFailed };
+//Text | blob
+class ObjectLob
+{
+public:
+	string		id_;		//used communicate with server to read or write data piece...
+	//methods
+	ObjectLob();						//just read from server
+	ObjectLob( string fileName );		//just load from local file
+	ObjectLob( int size, string data );	//just input raw data...
+	int save( string fileName );			//save as a local file, read from remote server
+	int load( string fileName );			//import from local file, write to remote server 
+	int write( string data, int size );
+	int read( string &date, int size );
+	int size();
+	bool empty();							//是否为空
+	int serialize( string &val );			//序列化
+	int deserialize( string val );			//反序列化
+	
+private:
+	string		data_;		//if size_>0, data_ has content, otherwise data_ save fileName ...
+	int			size_;
+	int			stat_;		//状态
+};
 
+class ObjectFile
+{
+public:
+	ObjectFile( );
+	ObjectFile( string fileName );
+	int save( string fileName );
+	int load( string fileName );
+	int create( string url );			//create remote file
+	int write( string data, int size );
+	int read( string &date, int size );
+	int size();
+	bool empty();							//是否为空
+	int serialize( string &val );			//序列化
+	int deserialize( string val );			//反序列化
+private:	
+	string		url_;		//path on the server side;
+	string		local_;		//local file path
+	int 		stat_;		//状态
+};
+
+class ObjectList
+{
+public:
+	ObjectList();
+
+private:
+	enum ObjectDataFlag				embedFlag_;				//嵌套类型标识
+	void*							pData_;					//vector<string|double|bool|ObjectFile|ObjectLob>*
+};
+
+////
+enum ObjectStatus { InitRead, NewData, DeleteData, UpdateData, WriteFailed };
 struct ObjectItem
 {
+public:
 	enum ObjectStatus		flag_;			//status
 	string					objectID_;		//object id
 	map<string, string>		objectFields_;	//field label-每个字段值的二进制字符串
 	
+	//methods
 	string getStringValue();
 	int getIntValue();
 	short getShortValue();
